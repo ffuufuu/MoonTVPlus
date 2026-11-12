@@ -86,6 +86,7 @@ import AnimeSubscriptionComponent from '@/components/AnimeSubscriptionComponent'
 import CorrectDialog from '@/components/CorrectDialog';
 import DataMigration from '@/components/DataMigration';
 import MemberCardsConfig from '@/components/MemberCardsConfig';
+import MemberSettingsConfig from '@/components/MemberSettingsConfig';
 import OpenListPathInput from '@/components/OpenListPathInput';
 import PageLayout from '@/components/PageLayout';
 
@@ -19539,6 +19540,13 @@ function AdminPageClient() {
       render: () => <MemberCardsConfig />,
     },
     {
+      key: 'memberSettings',
+      title: '会员设置',
+      ownerOnly: true,
+      icon: <Settings size={20} className={navIconClass} />,
+      render: () => <MemberSettingsConfig />,
+    },
+    {
       key: 'siteConfig',
       title: '站点配置',
       icon: <Settings size={20} className={navIconClass} />,
@@ -19984,6 +19992,18 @@ function AdminPageClient() {
               onToggle={() => toggleTab('memberCards')}
             >
               <MemberCardsConfig />
+            </CollapsibleTab>
+          )}
+
+          {/* 会员设置标签 - 仅站长可见 */}
+          {role === 'owner' && (
+            <CollapsibleTab
+              title='会员设置'
+              icon={<Settings size={20} className='text-gray-600 dark:text-gray-400' />}
+              isExpanded={expandedTabs.memberSettings}
+              onToggle={() => toggleTab('memberSettings')}
+            >
+              <MemberSettingsConfig />
             </CollapsibleTab>
           )}
 
