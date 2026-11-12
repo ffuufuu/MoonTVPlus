@@ -6,6 +6,7 @@ import { getAuthInfoFromCookie } from '@/lib/auth';
 import { getAvailableApiSites, getCacheTime, getConfig } from '@/lib/config';
 import { getDetailFromApiV2 } from '@/lib/downstream';
 import { getProxyToken } from '@/lib/emby-token';
+import { requireEntitlement } from '@/lib/membership';
 import { hasFeaturePermission } from '@/lib/permissions';
 import {
   createBaiduNetdiskSession,
@@ -167,6 +168,9 @@ function formatNetdiskEpisodeTitle(
  * 根据 source 和 id 直接获取视频详情
  * 这个API专门用于play页面快速获取当前源的详情
  */
+export async function GET(request: NextRequest) {
+  const gate = await requireEntitlement(request);
+  if (gate) return gate;
 export async function GET(request: NextRequest) {
   const authInfo = getAuthInfoFromCookie(request);
   if (!authInfo || !authInfo.username) {
