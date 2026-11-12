@@ -44,6 +44,18 @@ MTV_LIC_CACHE_MS=60000           # 授权结果缓存毫秒，默认 60 秒
 2. **直播**（`/api/proxy/m3u8`、`/api/proxy/segment`）暂未接入，需要时同样加 6 行。
 3. 网页侧目前是“设备号”而非“账号”，换浏览器会换号；要跨设备同一会员需改成账号绑定。
 
+## 分支与上游同步
+
+当前改动直接提交在 `main`。以后上游更新时：
+
+```bash
+git remote add upstream https://github.com/mtvpls/MoonTVPlus.git
+git fetch upstream
+git merge upstream/main      # 不要 reset --hard，就会走冲突合并
+```
+
+冲突点预计只在两个代理路由的 6 行校验，改不动就先设 `MTV_LIC_ENABLED=0` 再合。
+
 ## 回滚
 
 把 `MTV_LIC_ENABLED` 改成 `0` 重启容器即可，代码不用回退。
