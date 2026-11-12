@@ -2418,6 +2418,8 @@ function PlayPageClient() {
 
   // 下载选集面板显示状态
   const [showDownloadSelector, setShowDownloadSelector] = useState(false);
+  const [showInPlayerEpisodes, setShowInPlayerEpisodes] = useState(false);
+  const [showCastSheet, setShowCastSheet] = useState(false);
 
   // 换源加载状态
   const [isVideoLoading, setIsVideoLoading] = useState(true);
@@ -6219,6 +6221,44 @@ function PlayPageClient() {
   };
 
   // 处理集数切换
+  const handleRemoteCast = async () => {
+    const video = artPlayerRef.current?.video as any;
+    if (!video) {
+      return;
+    }
+    try {
+      if (video.remote && typeof video.remote.prompt === 'function') {
+        await video.remote.prompt();
+      } else if (artPlayerRef.current) {
+        artPlayerRef.current.notice.show = '这台设备不支持系统投屏';
+      }
+    } catch (e) {
+      if (artPlayerRef.current) {
+        artPlayerRef.current.notice.show = '投屏取消或不支持';
+      }
+    }
+  };
+
+  const copyPlayUrl = async () => {
+    try {
+      const url =
+        (artPlayerRef.current?.video as any)?.currentSrc ||
+        artPlayerRef.current?.url ||
+        '';
+      if (!url) {
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      if (artPlayerRef.current) {
+        artPlayerRef.current.notice.show = '播放地址已复制';
+      }
+    } catch (e) {
+      if (artPlayerRef.current) {
+        artPlayerRef.current.notice.show = '复制失败，长按链接手动复制';
+      }
+    }
+  };
+
   const handleEpisodeChange = async (episodeNumber: number) => {
     if (episodeNumber < 0 || episodeNumber >= totalEpisodes) {
       return;
@@ -8505,6 +8545,24 @@ function PlayPageClient() {
                   return;
                 }
                 handleNextEpisode();
+              },
+            },
+            {
+              position: 'left',
+              index: 12,
+              html: '<i class="art-icon flex"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></i>',
+              tooltip: '选集',
+              click: function () {
+                setShowInPlayerEpisodes(true);
+              },
+            },
+            {
+              position: 'right',
+              index: 90,
+              html: '<i class="art-icon flex"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 8.5a13 13 0 0 1 20 0M5.5 12a8.5 8.5 0 0 1 13 0M9 15.5a4 4 0 0 1 6 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="19" r="1.6" fill="currentColor"/></svg></i>',
+              tooltip: '投屏',
+              click: function () {
+                setShowCastSheet(true);
               },
             },
             // iOS 设备上添加自定义全屏按钮（横屏和竖屏都显示）
@@ -10898,6 +10956,76 @@ function PlayPageClient() {
                   ref={artRef}
                   className='bg-black w-full h-full rounded-xl overflow-hidden shadow-lg'
                 ></div>
+
+                {/* 播放器内选集面板 */}
+                {showInPlayerEpisodes && (
+                  <div className='absolute inset-0 z-[600] bg-black/85 backdrop-blur-sm rounded-xl flex flex-col'>
+                    <div className='flex items-center justify-between px-4 py-3 border-b border-white/10'>
+                      <span className='text-white text-sm font-medium'>
+                        选集 · 共 {totalEpisodes} 集
+                      </span>
+                      <button
+                        onClick={() => setShowInPlayerEpisodes(false)}
+                        className='text-white/70 hover:text-white text-sm px-2 py-1'
+                      >
+                        关闭
+                      </button>
+                    </div>
+                    <div className='flex-1 overflow-y-auto p-3'>
+                      <div className='grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-10 gap-2'>
+                        {Array.from({ length: totalEpisodes }).map((_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => {
+                              handleEpisodeChange(i);
+                              setShowInPlayerEpisodes(false);
+                            }}
+                            className={`h-9 rounded-lg text-xs truncate px-1 ${
+                              i === currentEpisodeIndex
+                                ? 'bg-green-500 text-black font-semibold'
+                                : 'bg-white/10 text-white/80 hover:bg-white/20'
+                            }`}
+                          >
+                            {detail?.episodes_titles?.[i] || `第 ${i + 1} 集`}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 播放器内投屏面板 */}
+                {showCastSheet && (
+                  <div className='absolute inset-0 z-[600] bg-black/85 backdrop-blur-sm rounded-xl flex items-center justify-center p-4'>
+                    <div className='w-full max-w-sm bg-[#141420] border border-white/10 rounded-2xl p-4'>
+                      <div className='text-white text-sm font-medium mb-1'>投屏</div>
+                      <p className='text-white/50 text-xs mb-3'>
+                        把当前播放地址投到电视或其他设备
+                      </p>
+                      <button
+                        onClick={handleRemoteCast}
+                        className='w-full text-left px-3 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white text-sm mb-2'
+                      >
+                        系统投屏（Chromecast / AirPlay）
+                      </button>
+                      <button
+                        onClick={copyPlayUrl}
+                        className='w-full text-left px-3 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white text-sm'
+                      >
+                        复制播放地址（给电视上的播放器用）
+                      </button>
+                      <p className='text-white/30 text-[11px] mt-3 leading-relaxed'>
+                        局域网 DLNA 直接搜电视需要 App 提供原生能力，网页端扫不到局域网设备。
+                      </p>
+                      <button
+                        onClick={() => setShowCastSheet(false)}
+                        className='w-full mt-3 py-2 rounded-xl bg-white/5 text-white/60 text-xs'
+                      >
+                        关闭
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* 换源加载蒙层 */}
                 {(isVideoLoading || videoError) && (
