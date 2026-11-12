@@ -23,6 +23,8 @@ export type License = {
 const BASE = process.env.MTV_LIC_BASE || 'http://172.19.0.1:8099';
 const CACHE_MS = Number(process.env.MTV_LIC_CACHE_MS || 60000);
 const FAIL_OPEN = process.env.MTV_LIC_FAIL_OPEN !== '0';
+/** 演示/强制模式：即使后端 pay_enabled=false（全站免费），也按“必须有卡”处理 */
+const REQUIRE_PAY = process.env.MTV_LIC_REQUIRE_PAY === '1';
 
 export function licenseEnabled(): boolean {
   return process.env.MTV_LIC_ENABLED === '1';
@@ -107,6 +109,9 @@ export async function checkEntitlement(request: Request): Promise<Gate> {
   }
   if (lic.state === 'expired') {
     return { ok: false, reason: 'expired', license: lic };
+  }
+  if (lic.state === 'free' && REQUIRE_PAY) {
+    return { ok: false, reason: 'no-card', license: lic };
   }
   return { ok: true, license: lic };
 }
