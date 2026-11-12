@@ -240,7 +240,7 @@ export default function MemberSettingsConfig() {
                         <span className='px-1.5 py-0.5 rounded bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'>
                           已拉黑
                         </span>
-                      ) : card && active ? (
+                      ) : active ? (
                         <span className='px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'>
                           会员
                         </span>
@@ -251,7 +251,7 @@ export default function MemberSettingsConfig() {
                       )}
                     </td>
                     <td className='px-2 py-2 text-gray-600 dark:text-gray-400'>
-                      {card && active ? `${daysLeft(exp)} 天` : '—'}
+                      {active ? `${daysLeft(exp)} 天` : '—'}
                     </td>
                     <td className='px-2 py-2 text-gray-600 dark:text-gray-400'>
                       {exp > 0
@@ -266,7 +266,7 @@ export default function MemberSettingsConfig() {
                         {blocked ? <Unlock size={12} /> : <Ban size={12} />}
                         {blocked ? '解除' : '拉黑'}
                       </button>
-                      {card && (
+                      {(active || !!card) && (
                         <button
                           onClick={() => deviceOp(d.id, { unbind: true })}
                           className='text-gray-500 hover:underline'
