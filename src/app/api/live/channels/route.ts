@@ -13,7 +13,6 @@ export async function GET(request: NextRequest) {
     const gate = await requireEntitlement(request);
     if (gate) return gate;
     const { searchParams } = new URL(request.url);
-    const sourceKey    const { searchParams } = new URL(request.url);
     const sourceKey = searchParams.get('source');
 
     if (!sourceKey) {
