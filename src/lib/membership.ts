@@ -131,3 +131,19 @@ export function blocked(message: string, reason: string) {
     { status: 402 }
   );
 }
+
+
+/** 路由里一行调用：不通过就直接 return 它 */
+export async function requireEntitlement(
+  request: Request
+): Promise<Response | null> {
+  const gate = await checkEntitlement(request);
+  if (gate.ok) return null;
+  const msg =
+    gate.reason === 'expired'
+      ? '会员已过期，请续费后观看'
+      : gate.reason === 'no-device'
+        ? '请先打开会员页激活卡密'
+        : '请先在会员页激活卡密';
+  return blocked(msg, gate.reason);
+}
