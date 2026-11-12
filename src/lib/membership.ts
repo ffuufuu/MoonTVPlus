@@ -145,5 +145,5 @@ export async function requireEntitlement(
       : gate.reason === 'no-device'
         ? '请先打开会员页激活卡密'
         : '请先在会员页激活卡密';
-  return blocked(msg, gate.reason);
+  return blocked(msg, gate.reason || 'no-card');
 }
