@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { blocked, checkEntitlement } from '@/lib/membership';
 import { validateProxyUrlServerSide } from '@/lib/server/ssrf';
 
 export const runtime = 'nodejs';
@@ -10,6 +11,15 @@ export async function GET(request: Request) {
 
   if (!videoUrl) {
     return NextResponse.json({ error: 'Missing video URL' }, { status: 400 });
+  }
+
+  // ---- 会员卡密校验（MTV_LIC_ENABLED=1 时生效）----
+  const gate = await checkEntitlement(request);
+  if (!gate.ok) {
+    return blocked(
+      gate.reason === 'expired' ? '会员已过期，请续费后观看' : '请先在会员页激活卡密',
+      gate.reason || 'need-card'
+    );
   }
 
   // 安全校验：防 SSRF，只允许合法的公网 URL
