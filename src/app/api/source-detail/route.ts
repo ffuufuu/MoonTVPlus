@@ -171,7 +171,7 @@ function formatNetdiskEpisodeTitle(
 export async function GET(request: NextRequest) {
   const gate = await requireEntitlement(request);
   if (gate) return gate;
-export async function GET(request: NextRequest) {
+
   const authInfo = getAuthInfoFromCookie(request);
   if (!authInfo || !authInfo.username) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
