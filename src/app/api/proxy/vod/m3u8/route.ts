@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 
 import { getConfig } from "@/lib/config";
+import { requireEntitlement } from '@/lib/membership';
 import { getBaseUrl, resolveUrl } from "@/lib/live";
 import { validateProxyUrlServerSide } from '@/lib/server/ssrf';
 import { buildProxyM3u8Headers, buildProxyStreamHeaders } from '@/lib/server/proxy-headers';
