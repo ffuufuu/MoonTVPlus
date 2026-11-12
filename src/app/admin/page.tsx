@@ -51,6 +51,7 @@ import {
   Settings,
   Smartphone,
   Tablet,
+  Ticket,
   Trash2,
   Tv,
   UserPlus,
@@ -84,6 +85,7 @@ import { MAIN_SOURCE_NAME } from '@/lib/openlist-sources';
 import AnimeSubscriptionComponent from '@/components/AnimeSubscriptionComponent';
 import CorrectDialog from '@/components/CorrectDialog';
 import DataMigration from '@/components/DataMigration';
+import MemberCardsConfig from '@/components/MemberCardsConfig';
 import OpenListPathInput from '@/components/OpenListPathInput';
 import PageLayout from '@/components/PageLayout';
 
@@ -19530,6 +19532,13 @@ function AdminPageClient() {
       ),
     },
     {
+      key: 'memberCards',
+      title: '会员卡密',
+      ownerOnly: true,
+      icon: <Ticket size={20} className={navIconClass} />,
+      render: () => <MemberCardsConfig />,
+    },
+    {
       key: 'siteConfig',
       title: '站点配置',
       icon: <Settings size={20} className={navIconClass} />,
@@ -19963,6 +19972,18 @@ function AdminPageClient() {
                 config={config}
                 refreshConfig={fetchConfig}
               />
+            </CollapsibleTab>
+          )}
+
+          {/* 会员卡密标签 - 仅站长可见 */}
+          {role === 'owner' && (
+            <CollapsibleTab
+              title='会员卡密'
+              icon={<Ticket size={20} className='text-gray-600 dark:text-gray-400' />}
+              isExpanded={expandedTabs.memberCards}
+              onToggle={() => toggleTab('memberCards')}
+            >
+              <MemberCardsConfig />
             </CollapsibleTab>
           )}
 
