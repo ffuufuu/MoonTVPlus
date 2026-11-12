@@ -107,6 +107,14 @@ export async function checkEntitlement(request: Request): Promise<Gate> {
       ? { ok: true, reason: 'license-unreachable' }
       : { ok: false, reason: 'license-unreachable' };
   }
+  const nowSec = Math.floor(Date.now() / 1000);
+  const expire = Number((lic as any).expire || 0);
+  const graceDays = Number((lic as any).grace_days || 0);
+  // 后台 pay_enabled=false 时 state 恒为 free，即便设备有卡；因此以 expire 为准
+  if (expire > nowSec) return { ok: true, license: lic };
+  if (expire > 0 && expire + graceDays * 86400 > nowSec) {
+    return { ok: true, reason: 'grace', license: lic };
+  }
   if (lic.state === 'expired') {
     return { ok: false, reason: 'expired', license: lic };
   }
