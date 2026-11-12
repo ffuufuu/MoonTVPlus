@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getConfig } from '@/lib/config';
+import { blocked, checkEntitlement } from '@/lib/membership';
 import { validateProxyUrlServerSide } from '@/lib/server/ssrf';
 
 export const runtime = 'nodejs';
@@ -20,6 +21,15 @@ export async function GET(request: NextRequest) {
     const token = searchParams.get('token');
     const adBlockEnabled = searchParams.get('adblock') !== 'false';
     const proxySegments = searchParams.get('proxySegments') === 'true';
+
+    // ---- 会员卡密校验（MTV_LIC_ENABLED=1 时生效）----
+    const gate = await checkEntitlement(request);
+    if (!gate.ok) {
+      return blocked(
+        gate.reason === 'expired' ? '会员已过期，请续费后观看' : '请先在会员页激活卡密',
+        gate.reason || 'need-card'
+      );
+    }
 
     // Token 鉴权：如果环境变量设置了 token，则必须验证
     const envToken = process.env.NEXT_PUBLIC_PROXY_M3U8_TOKEN;
