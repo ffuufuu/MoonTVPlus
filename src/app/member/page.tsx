@@ -76,7 +76,10 @@ export default function MemberPage() {
     if (!status.pay_enabled) return '当前全站免费（收费开关未开）';
     switch (status.state) {
       case 'ok':
-        return `会员有效${status.days_left ? `，剩余 ${status.days_left} 天` : ''}`;
+        const left = status.expire
+          ? Math.max(0, Math.ceil((status.expire * 1000 - Date.now()) / 86400000))
+          : status.days_left || 0;
+        return `会员有效，剩余 ${left} 天`;
       case 'trial':
         return `试用中，剩余 ${status.days_left} 天`;
       case 'grace':
