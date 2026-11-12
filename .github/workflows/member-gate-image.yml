@@ -2,7 +2,7 @@ name: build member-gate image
 
 on:
   push:
-    branches: [custom]
+    branches: [main]
     paths:
       - 'src/**'
       - 'package.json'
